@@ -128,7 +128,7 @@ Bundle 'MarcWeber/vim-addon-background-cmd'
 Bundle 'MarcWeber/vim-addon-completion'
 Bundle 'MarcWeber/vim-addon-swfmill'
 Bundle 'MarcWeber/vim-addon-mw-utils'
-Bundle 'jdonaldson/vim-haxe'
+" Bundle 'jdonaldson/vim-haxe'
 Bundle 'mileszs/ack.vim'
 Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
 Bundle 'wincent/Command-T'
