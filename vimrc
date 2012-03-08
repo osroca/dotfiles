@@ -88,6 +88,10 @@ map <space> /
 map <c-space> ?
 nmap <silent> ,/ :nohlsearch<CR>
 
+" Markdown preview
+imap <leader>p <ESC>:w!<CR>:!markdown --html4tags % > %.html && open %.html<CR><CR>a
+map  <leader>p <ESC>:w!<CR>:!markdown --html4tags % > %.html && open %.html<CR><CR>a
+
 "Vim 7 specific mappings
 if version >= 700
   map <C-t> <Esc>:tabnew<CR>
@@ -128,7 +132,7 @@ Bundle 'MarcWeber/vim-addon-background-cmd'
 Bundle 'MarcWeber/vim-addon-completion'
 Bundle 'MarcWeber/vim-addon-swfmill'
 Bundle 'MarcWeber/vim-addon-mw-utils'
-Bundle 'jdonaldson/vim-haxe'
+" Bundle 'jdonaldson/vim-haxe'
 Bundle 'mileszs/ack.vim'
 Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
 Bundle 'wincent/Command-T'
