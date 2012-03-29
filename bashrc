@@ -40,7 +40,9 @@ function setdsm() {
  echo "DJANGO_SETTINGS_MODULE set to $DJANGO_SETTINGS_MODULE"
 }
 
+export CLICOLOR=1
 export LSCOLORS="gxfxcxdxbxegedabagacad"
+export LS_COLORS="gxfxcxdxbxegedabagacad"
 export CVSEDITOR=vim
 export EDITOR=vim
 #export JAVA_OPTS=-Xmx2500m
