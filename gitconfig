@@ -1,10 +1,10 @@
 [core]
-	excludesfile = /Users/justindonaldson/.gitignore
+	excludesfile = /Users/oscar/.gitignore
 	quotepath = false
 	autocrlf = input
 [user]
-	name = Justin Donaldson
-	email = donaldson@bigml.com
+	name = Oscar Rovira
+	email = rovira@bigml.com
 [color]
 	ui = true
 [alias]
