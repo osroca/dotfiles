@@ -1,224 +1,253 @@
-syntax enable
-" change the mapleader from \ to ,
-let mapleader=","
-" Use Q for formatting the current paragraph (or selection)
-vmap Q gq
-nmap Q gqap
-nnoremap ; :
-autocmd VimEnter * wincmd p
-  
-syntax on
+" A great overview of the rationale behind some of these options is given
 
-""" BASIC OPTIONS 
-set background=dark
+" here: http://stevelosh.com/blog/2010/09/coming-home-to-vim/
+
+" First, make the leader and command characters easier to type
+let mapleader=","
+nnoremap ; :
+" Add some commands to quickly open or source this file
+    nmap <Leader>1 :e $MYVIMRC<CR>
+    nmap <Leader>so :so %<CR>
+
+" Now we need to load vundle, it manages all of the extra plugins for vim
+" It must be done first
+" Bootstrap
+let root = '~/.vim/bundle/'
+let src = 'http://github.com/gmarik/vundle.git'
+
+if !isdirectory(expand(root, 1).'/vundle')
+  exec '!git clone '.src.' '.shellescape(root, 1).'/vundle'
+endif
+
+exec 'set rtp+='.root.'/vundle'
+
+call vundle#rc(root)
+
+" Vundle configs are stored in a separate file, source it.
+source ~/.vim/settings/vundle.vim
+nmap <Leader>vu :e ~/.vim/settings/vundle.vim<CR>
+
+let g:ackprg = 'ag --nogroup --nocolor --column'
+
+
+"BASIC OPTIONS
+set tags=./tags;/
+set shell=bash
 set encoding=utf-8
-set visualbell
 set nocompatible
-set laststatus=2 " Always show the statusline
-set t_Co=256 " Explicitly tell vim that the terminal has 256 colors
-" set t_Co=16 " Explicitly tell vim that the terminal has 256 colors
-set number
+set number        " show line numbers
 set nowrap        " don't wrap lines
-set tabstop=8     " a tab is four spaces
+set tabstop=8     " a tab is eight spaces
 set shiftwidth=4  " number of spaces to use for autoindenting
-set autoindent
-set expandtab
-set backspace=indent,eol,start
-                  " allow backspacing over everything in insert mode
-set autoindent    " always set autoindenting on
+set expandtab     " expand tabs to spaces
 set copyindent    " copy the previous indentation on autoindenting
-set smartindent   " use smart indenting for c/c++
+set nosmartindent
 set cindent       " useful for python
 set number        " always show line numbers
 set shiftround    " use multiple of shiftwidth when indenting with '<' and '>'
-set showmatch     " set show matching parenthesis
-set ignorecase    " ignore case when searching
-set smartcase     " ignore case if search pattern is all lowercase,
-                  "    case-sensitive otherwise
-set smarttab      " insert tabs on the start of a line according to
-                  "    shiftwidth, not tabstop
-set hlsearch      " highlight search terms
-set incsearch     " show search matches as you type
-
-set history=1000         " remember more commands and search history
+set hidden               " hide the old buffer when switching
 set undolevels=1000      " use many muchos levels of undo
-set wildignore=*.swp,*.bak,*.pyc,*.class
+set wildignore=*.swp,*.bak,*.pyc,*.class,*.sass-cache,*/_site/*
 set title                " change the terminal's title
 set visualbell           " don't beep
-set noerrorbells         " don't beep
-set nobackup
-set noswapfile
+set noerrorbells         " no, seriously, don't beep
+set clipboard+=unnamed    " use system clipboard
+set lazyredraw
+set mouse=a             " use mouse in nvich modes
+set autowrite
+
+" These are all options releated to searching
+set ignorecase
+set smartcase
+set gdefault
+set hlsearch
+
+" color too-wide columns
+syntax on         " syntax highlighting, natch
+
+" better completion popup options
+highlight Pmenu ctermbg=238 gui=bold
+set completeopt=menuone
 
 
-filetype plugin indent on     " required! 
+autocmd BufEnter Makefile set noexpandtab | set tabstop=4
 
-""" pasting
-set pastetoggle=<F2>
+" Use 'extra magic' for regex searches
+nnoremap <space> ?
+vnoremap <space> ?
+
+" Some  general reformatting command(s)
+" strip whitespace at end of line
+nnoremap <Leader>f$ :%s/\s\+$//<CR>:let @/=''<CR>
+
+"fix line (or visual block lines)
+nnoremap <Leader>fl :normal gqq==<CR>
+vnoremap <Leader>fl :normal gvgqgv=<CR>
+" fix operator/type declaration spacing (single space each side) on line
+nnoremap <Leader>ml :call ExpandDelimited()<CR>
+vnoremap <Leader>ml :call ExpandDelimited()<CR>
+
+"autocmd BufNewFile,BufRead *.hx set formatprg=astyle\ --style=java\ -A2p
+autocmd BufNewFile,BufRead *.hx setlocal formatprg=uncrustify\ -l\ cs\ --no-backup\ 2>/dev/null
+autocmd BufNewFile,BufRead *.js setlocal makeprg=phantomjs\ %
+autocmd BufNewFile,BufRead *.cpp setlocal formatprg=uncrustify\ --no-backup\ 2>/dev/null
+
+:autocmd BufNewFile,BufRead *.md set tw=80
+let g:tagbar_type_markdown = {
+    \ 'ctagstype' : 'markdown',
+    \ 'kinds' : [
+        \ 'h:Heading_L1',
+        \ 'i:Heading_L2',
+        \ 'k:Heading_L3'
+    \ ]
+\ }
+
+nnoremap <Leader>e :make run<CR>
+
+function! ExpandDelimited()
+    " new line after opening paren/bracket
+    :s/{/{\r/e
+    :s/\[/\[\r/e
+    :s/,/,\r/e
+    exe "normal :vi[="
+    exe "normal :vi{="
+endfunction
 
 
-" Key Mappings
-cmap w!! w !sudo tee % >/dev/null
-map <s-J> <c-w>j<c-w>
-map <s-K> <c-w>k<c-w>
-map <s-h> <c-w>h<c-w>
-map <s-l> <c-w>l<c-w>
+"GLOBAL AUTOMATIC ACTIONS
+" autosave on lost focus
+au FocusLost * :wa
+
+" tab through buffers in normal mode
+map <silent> <S-TAB> <C-W>W
+
+nmap <expr><silent> q winnr() != 1 ? ":q\<CR>" : "q"
+
+" Show cheats
+map <leader>ch :call ToggleCheatSheet()<CR>
+augroup thx
+    autocmd BufEnter */dhx/* set noexpandtab | set tabstop=4
+    autocmd BufEnter */thx/* set noexpandtab | set tabstop=4
+augroup END
 
 
-" emacs movement keybindings in insert mode
-imap <C-a> <C-o>0
-imap <C-e> <C-o>$
-map <C-e> $
-map <C-a> 0
+" if exists('+colorcolumn')
+"   set colorcolumn=80
+" else
+"     au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+" endif
 
-noremap <silent> <C-S>          :update<CR>
-vnoremap <silent> <C-S>         <C-C>:update<CR>
-inoremap <silent> <C-S>         <C-O>:update<CR>
+set guifont=Monaco\ for\ Powerline:h13
 
-map <leader>1 :TagbarToggle<CR>
-map <leader>2 :ToggleNERDTree<CR>
-map <leader>3 :GundoToggle<CR>
-" sources $MYVIMRC 
-nmap <Leader>s :source $MYVIMRC
-" 
-" opens $MYVIMRC for editing, or use :tabedit $MYVIMRC
-nmap <Leader>ev :e $MYVIMRC<CR>
-nmap <Leader>sv :so $MYVIMRC<CR>
+function! DoWindowSwap()
+    "Mark destination
+    let curNum = winnr()
+    let curBuf = bufnr( "%" )
+    let targetWin =  1
+    exe targetWin."wincmd w"
+    let foo = 0
+    while winwidth('%') < 5 || winheight('%') < 5 || targetWin > bufnr("$")
+        let targetWin = targetWin + 1
+        exe targetWin."wincmd w"
+    endwhile
 
-map <space> /
-map <c-space> ?
-nmap <silent> ,/ :nohlsearch<CR>
+    "Switch to source and shuffle dest->source
+    let markedBuf = bufnr( "%" )
+    "Hide and open so that we aren't prompted and keep history
+    exe 'hide buf' curBuf
+    "Switch to dest and shuffle source->dest
+    exe curNum . "wincmd w"
+    "Hide and open so that we aren't prompted and keep history
+    exe 'hide buf' markedBuf
+    exe targetWin."wincmd w"
+endfunction
 
-" Markdown preview
-imap <leader>p <ESC>:w!<CR>:!markdown --html4tags % > %.html && open %.html<CR><CR>a
-map  <leader>p <ESC>:w!<CR>:!markdown --html4tags % > %.html && open %.html<CR><CR>a
-
-"Vim 7 specific mappings
-if version >= 700
-  map <C-t> <Esc>:tabnew<CR>
-  map <C-F4> <Esc>:tabclose<CR>
+" SCSS compiler
+if !exists('*SCSStocss')
+  function! SCSStocss()
+    "let src = tempname()
+    let src = bufname('%')
+    echo src
+    let dst = substitute( bufname('%'),'.scss','.css','g' )
+    echo 'writing css to ' . dst
+    "execute 'w ! sass --sourcemap=none --scss -s ' . dst
+    w
+    execute '! sass --poll '. src . ':' . dst
+    endfunction
 endif
+" convert scss to css when the buffer is written
+au! BufWriteCmd *.scss call SCSStocss()
+
+" nmap <silent> <expr><CR> winnr() != 1 && &buftype =='' ? ":call DoWindowSwap()\<CR>" : "\<CR>"
+nmap <silent> <tab> :wincmd w<CR>
+
+" MISC KEY MAPPING
+
+" force write a file
+cmap w!! w !sudo tee % >/dev/null
+" insert a newline  below in normal mode
+nnoremap <C-J> hmao<esc>`a
+
+" execute the current line as a shell command, insert
+" results below the line
+nnoremap <Leader>r :exe ':r ! '.getline('.') <CR>
+
+" stamp paste with capital S
+nnoremap S "_diwP"
+
+map <Leader>pc :call ToggleEnablePreview()<CR>
+
+" requires vaxe
+map <Leader>oh :call vaxe#OpenHxml()<CR>
+map <Leader>ct :call vaxe#Ctags()<CR>
+map <Leader>ic :call vaxe#ImportClass()<CR>
+map <Leader>pj :call vaxe#ProjectHxml()<CR>
+
+" All of my 'panels'
+nmap <silent> <leader>q :call ToggleList("Quickfix List", 'c')<CR>
+map <Leader>w :NERDTreeToggle<CR>
+map <Leader>g :TagbarToggle<CR>
+"map <Leader>y :YRShow<CR>
+
+
+" browser refresh settings
+let g:RefreshRunningBrowserDefault = 'chrome'
 
 " echo current syntax scope
-map <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
-\ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
-\ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
+map <Leader>syn :echo "hi<" . synIDattr(synID(line("."), col("."), 1), "name")
+            \. "> trans<"
+            \. synIDattr(synID(line("."),col("."),0),"name")
+            \. "> lo<"
+            \. synIDattr(synIDtrans(synID(line("."),col("."),1)), "name")
+            \. ">"<CR>
 
-map <c-1> call haxe#BuildHXMLPath()
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
+"showmarks
+highlight ShowMarksHLl   cterm=bold ctermfg=1 ctermbg=12 gui=bold guifg=black guibg=lightblue
+highlight ShowMarksHLu   cterm=bold ctermfg=1 ctermbg=12 gui=bold guifg=darkblue guibg=lightblue
+highlight ShowMarksHLo   cterm=bold ctermfg=8 ctermbg=12 gui=bold guifg=darkgray guibg=lightblue
+highlight ShowMarksHLm   cterm=bold ctermfg=1 ctermbg=4 gui=bold guifg=white guibg=lightblue
 
-" let Vundle manage Vundle
-" required!
-Bundle 'gmarik/vundle'
-
-" original repos on github
-Bundle 'xolox/vim-session'
-Bundle 'ervandew/screen'
-Bundle 'tyru/open-browser.vim'
-Bundle 'cakebaker/scss-syntax.vim'
-Bundle 'vim-scripts/a.vim'
-Bundle 'honza/snipmate-snippets'
-Bundle 'tpope/vim-surround'
-Bundle 'majutsushi/tagbar'
-Bundle 'vim-scripts/taglist.vim'
-Bundle 'scrooloose/syntastic'
-Bundle 'Lokaltog/vim-powerline'
-Bundle 'MarcWeber/vim-addon-manager'
-Bundle 'MarcWeber/vim-addon-actions'
-Bundle 'MarcWeber/vim-addon-mw-utils'
-Bundle 'MarcWeber/vim-addon-views'
-Bundle 'MarcWeber/vim-addon-goto-thing-at-cursor'
-Bundle 'MarcWeber/vim-addon-background-cmd'
-Bundle 'MarcWeber/vim-addon-completion'
-Bundle 'MarcWeber/vim-addon-swfmill'
-Bundle 'MarcWeber/vim-addon-mw-utils'
-" Bundle 'jdonaldson/vim-haxe'
-Bundle 'mileszs/ack.vim'
-Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
-Bundle 'wincent/Command-T'
-Bundle 'tsaleh/vim-supertab' 
-let g:SuperTabDefaultCompletionType = "context"
-Bundle 'garbas/vim-snipmate'
-Bundle 'vim-scripts/Wombat.git'
-Bundle 'tpope/vim-unimpaired' 
-Bundle 'tpope/vim-fugitive'
-Bundle 'rson/vim-conque'
-Bundle "tomtom/tlib_vim"
-" vim-scripts repos
-Bundle 'localvimrc'
-Bundle 'bufexplorer.zip'
-Bundle 'Gundo'
-Bundle 'The-NERD-tree'
-Bundle 'NERD_tree-Project'
-Bundle 'The-NERD-Commenter'
-Bundle 'desert.vim'
-Bundle 'Color-Sampler-Pack'
-Bundle 'vimomni'
-Bundle 'L9'
-Bundle 'FuzzyFinder'
-
-" vim-omni 
-"improve autocomplete menu color
-highlight Pmenu ctermbg=238 gui=bold
-
-filetype plugin indent on " required!
-"
-" Brief help
-"
-" :BundleInstall - install bundles (won't update installed)
-" :BundleInstall! - update if installed
-"
-" :Bundles foo - search for foo
-" :Bundles! foo - refresh cached list and search for foo
-"
-" :BundleClean - confirm removal of unused bundles
-" :BundleClean! - remove without confirmation
-"
-" see :h vundle for more details
-" or wiki for FAQ
-" Note: comments after Bundle command are not allowed..
-
-let g:Powerline_symbols = 'fancy'
-set guifont=Menlo\ for\ Powerline:h11
-let g:tagbar_type_haxe = {
-    \ 'ctagstype' : 'haxe',
-    \ 'kinds'     : [
-        \ 'c:classes',
-        \ 'v:variables',
-        \ 'f:functions',
-    \ ]
-	\ }
-
-
-function! GetBufferList()
-  redir =>buflist
-  silent! ls
-  redir END
-  return buflist
+"higlight trailing whitespaces
+highlight ExtraWhitespace ctermbg=red guibg=red
+match ExtraWhitespace /\s\+\%#\@<!$/
+au InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+au InsertLeave * match ExtraWhitespace /\s\+$/
+" Removes trailing spaces
+function TrimWhiteSpace()
+  %s/\s*$//
+  ''
 endfunction
+au BufWritePre *.py,*.js :call TrimWhiteSpace()
 
-function! ToggleList(bufname, pfx)
-  let buflist = GetBufferList()
-  for bufnum in map(filter(split(buflist, '\n'), 'v:val =~ "'.a:bufname.'"'), 'str2nr(matchstr(v:val, "\\d\\+"))')
-    if bufwinnr(bufnum) != -1
-      exec(a:pfx.'close')
-      return
-    endif
-  endfor
-  if a:pfx == 'l' && len(getloclist(0)) == 0
-      echohl ErrorMsg
-      echo "Location List is Empty."
-      return
-  endif
-  let winnr = winnr()
-  exec(a:pfx.'open')
-  if winnr() != winnr
-    wincmd p
-  endif
-endfunction
-
-nmap <silent> <leader>5 :call ToggleList("Location List", 'l')<CR>
-nmap <silent> <leader>6 :call ToggleList("Quickfix List", 'c')<CR>
-
-" python specific settings:
+"python
 au FileType python setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=4
+au FileType python set omnifunc=pythoncomplete#Complete
+if filereadable($VIRTUAL_ENV . '/.vimrc')
+    source $VIRTUAL_ENV/.vimrc
+endif
+"Javascript
+au FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+"HTML
+au FileType html set omnifunc=htmlcomplete#CompleteTags
+"CSS
+au FileType css set omnifunc=csscomplete#CompleteCSS
