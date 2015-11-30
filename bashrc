@@ -18,7 +18,7 @@ export PS1="\[\e[01;32m\]\h \[\e[01;33m\]\W \$(parse_git_branch)\[\e[01;33m\]$\[
 
 export NODE_PATH="/usr/local/lib/jsctags/:/usr/local/lib/node:$NODE_PATH"
 
-export PATH=~/bin:/opt/local/bin:~/mongodb/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/local/share/npm/bin:/usr/local/mysql/bin:$PATH
+export PATH=~/bin:/opt/local/bin:~/software/mongodb/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/local/share/npm/bin:/usr/local/mysql/bin:~/software/haxe:$PATH
 export VIM_APP_DIR=/Applications/MacVim-7_3-53/
 #export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home/
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/latest/Contents/Home/
